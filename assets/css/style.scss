@@ -1,0 +1,283 @@
+@import '../../../../codyhouse-framework/main/assets/css/_global.scss'; // ⚠️ make sure to import the CodyHouse framework
+@import url('https://fonts.googleapis.com/css?family=Playfair+Display:700,900|Fira+Sans:400,400italic'); // custom font
+
+// --------------------------------
+
+// Horizontal Timeline - by CodyHouse.co
+
+// --------------------------------
+
+:root {
+  // colors
+  @include defineColorHSL(--cd-color-1, 0, 0%, 22%);   // Mine Shaft
+  @include defineColorHSL(--cd-color-2, 74, 93%, 32%); // Highland
+  @include defineColorHSL(--cd-color-3, 0, 0%, 97%);   // Alabaster
+
+  // font
+  --font-primary: 'Fira Sans', sans-serif;
+  --font-secondary: 'Playfair Display', serif;
+}
+
+body {
+  color: var(--cd-color-1);
+  background-color: var(--cd-color-3);
+}
+
+
+.js {
+  .cd-h-timeline {
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .cd-h-timeline--loaded { // show the timeline after dates position has been set (using JavaScript)
+    opacity: 1;
+  }
+
+  .cd-h-timeline__container {
+    position: relative;
+    height: 100px;
+    max-width: 800px;
+  }
+
+  .cd-h-timeline__dates {
+    position: relative;
+    height: 100%;
+    margin: 0 40px;
+    overflow: hidden;
+
+    &::after, &::before { // these are used to create a shadow effect at the sides of the timeline
+      content: '';
+      position: absolute;
+      z-index: 2;
+      top: 0;
+      height: 100%;
+      width: 20px;
+    }
+
+    &::before {
+      left: 0;
+      background: linear-gradient(to right, var(--cd-color-3), alpha(var(--cd-color-3), 0));
+    }
+
+    &::after {
+      right: 0;
+      background: linear-gradient(to left, var(--cd-color-3), alpha(var(--cd-color-3), 0));
+    }
+  }
+
+  .cd-h-timeline__line { // grey line
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top: 49px;
+    height: 2px; // width will be set using JavaScript
+    background-color: lightness(var(--cd-color-3), 0.9);
+    transition: transform 0.4s;
+  }
+
+  .cd-h-timeline__filling-line { // green filling line
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    background-color: var(--cd-color-2);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.3s;
+  }
+
+  .cd-h-timeline__date {
+    position: absolute;
+    bottom: 0; // left position will be set using JavaScript
+    z-index: 2;
+    text-align: center;
+    font-size: 0.8em;
+    padding-bottom: var(--space-sm);
+    color: var(--cd-color-1);
+    user-select: none; // improve swipe
+    text-decoration: none;
+
+    &::after { // this is used to create the event spot
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: -5px;
+      height: 12px;
+      width: 12px;
+      border-radius: 50%;
+      border-width: 2px;
+      border-style: solid;
+      border-color: lightness(var(--cd-color-3), 0.9);
+      background-color: var(--cd-color-3);
+      transition: background-color 0.3s, border-color .3s;
+    }
+
+    &:hover::after {
+      background-color: var(--cd-color-2);
+      border-color: var(--cd-color-2);
+    }
+
+    @include breakpoint(md) {
+      font-size: 0.7em;
+    }
+  }
+
+  .cd-h-timeline__date--selected {
+    pointer-events: none;
+
+    &::after {
+      background-color: var(--cd-color-2);
+      border-color: var(--cd-color-2);
+    }
+  }
+
+  .cd-h-timeline__date--older-event::after {
+    border-color: var(--cd-color-2);
+  }
+
+  .cd-h-timeline__navigation { // arrows to navigate the timeline
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 34px;
+    width: 34px;
+    border-radius: 50%;
+    border-width: 2px;
+    border-style: solid;
+    border-color: lightness(var(--cd-color-3), 0.9);
+    transition: border-color 0.3s;
+    
+    &::after { // arrow icon
+      content: '';
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
+      background: url(../img/cd-arrow.svg) no-repeat 0 0;
+    }
+
+    &:hover {
+      border-color: var(--cd-color-2);
+    }
+  }
+
+  .cd-h-timeline__navigation--prev {
+    left: 0;
+    transform: translateY(-50%) rotate(180deg);
+  }
+
+  .cd-h-timeline__navigation--next {
+    right: 0;
+  }
+
+  .cd-h-timeline__navigation--inactive {
+    cursor: not-allowed;
+
+    &::after {
+      background-position: 0 -16px;
+    }
+
+    &:hover {
+      border-color: lightness(var(--cd-color-3), 0.9);
+    }
+  }
+
+  .cd-h-timeline__events { // container of events info
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    transition: height .4s;
+  }
+
+  .cd-h-timeline__event { // single event info
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    padding: 1px 5%;
+    opacity: 0;
+    animation-duration: 0.4s;
+    animation-timing-function: ease-in-out;
+  }
+
+  .cd-h-timeline__event--selected { // selected event info
+    position: relative;
+    z-index: 2;
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .cd-h-timeline__event--enter-right, 
+  .cd-h-timeline__event--leave-right { // animate event info
+    animation-name: cd-enter-right;
+  }
+
+  .cd-h-timeline__event--enter-left,  
+  .cd-h-timeline__event--leave-left { // animate event info
+    animation-name: cd-enter-left;
+  }
+
+  .cd-h-timeline__event--leave-right, 
+  .cd-h-timeline__event--leave-left {
+    animation-direction: reverse;
+  }
+
+  .cd-h-timeline__event-content {
+    max-width: 800px;
+  }
+
+  .cd-h-timeline__event-title {
+    color: var(--cd-color-1);
+    font-family: var(--font-secondary);
+    font-weight: 700;
+    font-size: var(--text-xxxl);
+  }
+
+  .cd-h-timeline__event-date {
+    display: block;
+    font-style: italic;
+    margin: var(--space-xs) auto;
+
+    &::before {
+      content: '- ';
+    }
+  }
+}
+
+@keyframes cd-enter-right {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+}
+
+@keyframes cd-enter-left {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+}
+
+html:not(.js) .cd-h-timeline__dates,
+html:not(.js) .cd-h-timeline__navigation { // hide timeline dates if js is disabled
+  display: none;
+}

@@ -1,10 +1,15 @@
-Horizontal Timeline
-=========
+# Horizontal Timeline
 
-An easy to customize, horizontal timeline powered by CSS and jQuery.
+An easy to customize, horizontal timeline powered by CSS and JavaScript.
 
-[Article on CodyHouse](http://codyhouse.co/gem/horizontal-timeline/)
+[Article on CodyHouse](http://codyhouse.co/gem/horizontal-timeline)
 
-[Demo](https://codyhouse.co/demo/horizontal-timeline/index.html)
+[Demo](https://codyhouse.co/demo/horizontal-timeline)
  
-[Terms](http://codyhouse.co/terms/)
+[License](https://codyhouse.co/license)
+
+## Dependencies
+
+This experiment is built upon the [CodyHouse Framework](https://github.com/CodyHouse/codyhouse-framework).
+
+Make sure to include both the _global.scss and util.js files of the framework.
